@@ -1,7 +1,6 @@
 
 # coding: utf-8
 
-# In[ ]:
 
 import os
 from urllib.request import urlretrieve
@@ -14,8 +13,6 @@ import numpy as np
 import pandas as pd
 from pandas import Series,DataFrame
 
-
-# In[18]:
 
 def GetInternalLinks(bsObj, includeUrl):
     includeUrl = urlparse(includeUrl).scheme+"://"+urlparse(includeUrl).netloc
@@ -31,15 +28,11 @@ def GetInternalLinks(bsObj, includeUrl):
     return internalLinks
 
 
-# In[19]:
-
 def GetBS(url):
     html = urlopen(url)
     bs = BeautifulSoup(html,"lxml")
     return bs
 
-
-# In[20]:
 
 def GetResult(bsObj):
     result = bsObj.find("div", {"class":"multiColumn2"}).find("table", {"class":"sTable"}).findAll("td")
@@ -50,8 +43,6 @@ def GetResult(bsObj):
         df.ix[var] = se
     return df
 
-
-# In[33]:
 
 def GetPlayerList(bsObj):
     tables = bsObj.find("div", {"class":"multiColumn6"}).findAll("table")
@@ -78,8 +69,6 @@ def GetPlayerList(bsObj):
     return df
 
 
-# In[46]:
-
 def ScraypingProcess(url):
     link = url.replace('result','program')
     bsObj = GetBS(url)
@@ -87,10 +76,7 @@ def ScraypingProcess(url):
     
     bsObj = GetBS(link)
     playerList = GetPlayerList(bsObj)
-    
-    p = re.compile(r'\d+')
-    
-    time.sleep(5)
+
     result.Lane = result.Lane.convert_objects(convert_numeric=True).fillna(-1).astype(np.int)
     result.Rank = result.Rank.apply(int_value)
     result.Rank = result.Rank.convert_objects(convert_numeric=True).fillna(6).astype(np.int)
@@ -106,8 +92,6 @@ def ScraypingProcess(url):
     return result
 
 
-# In[23]:
-
 def AccessYearUnit(year):
     month = 1
     yResult = GetDatesOfMonth(year, month)
@@ -120,8 +104,6 @@ def AccessYearUnit(year):
     return yResult
 
 
-# In[24]:
-
 def int_value(x):
     try:
         return int(x)
@@ -129,7 +111,6 @@ def int_value(x):
         return np.nan
 
 
-# In[25]:
 
 import datetime
 import calendar
@@ -149,9 +130,6 @@ def GetDatesOfMonth(year, month):
     
     return output_date_list
 
-
-# In[26]:
-
 import sqlite3
 import pandas.io.sql as psql
 
@@ -162,8 +140,7 @@ def CreateSqliteTable(data):
     return
 
 
-# In[44]:
-
+#sqliteからテーブル取得
 def GetSqliteTable():
 # 中身確認
     with sqlite3.connect("tmp.db") as conn:
@@ -172,15 +149,7 @@ def GetSqliteTable():
     return db
 
 
-# In[28]:
-
-def AccessMonthUnit(year, month):
-    days = GetDatesOfMonth(year, month)
-    return days
-
-
-# In[29]:
-
+# 日単位でデータ取得
 def AccessDayUnit(day):
     baseUrl = "http://app.boatrace.jp/race"
     accessUrl = "http://app.boatrace.jp/race/?day=yyyymmdd"
@@ -198,11 +167,11 @@ def AccessDayUnit(day):
         else:
             temp = ScraypingProcess(link)
             dResult = pd.concat([dResult, temp], ignore_index=True)
+        time.sleep(3)
         i += 1
     return dResult
 
 
-# In[48]:
 #ここから
 #初回のみ、DB作るために2015/12/31のデータを取得する
 #2回目以降はGetSqliteTableでデータを取得し、DataFrameにconcatして、再度上書きモードで保存する
@@ -213,19 +182,15 @@ def AccessDayUnit(day):
 #dbファイルがある場合はここから、年と月を切り替えて使用できる
 #年単位のメソッドもあるが、タイムアウトすると思う
 dbData = GetSqliteTable()
-days = GetDatesOfMonth(2016,1)
+print(dbData)
+#days = GetDatesOfMonth(2016,1)
 
-for day in days:
-    temp = AccessDayUnit(day)
-    result = pd.concat([dbData, temp], ignore_index=True)
-CreateSqliteTable(result)
-# In[46]:
+#for day in days:
+    #temp = AccessDayUnit(day)
+    #result = pd.concat([dbData, temp], ignore_index=True)
 
-#あとすること
-#・機械学習
+#CreateSqliteTable(result)
 
-
-# In[ ]:
 
 
 
