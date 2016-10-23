@@ -80,7 +80,13 @@ def ScraypingProcess(url):
     result.Lane = result.Lane.convert_objects(convert_numeric=True).fillna(-1).astype(np.int)
     result.Rank = result.Rank.apply(int_value)
     result.Rank = result.Rank.convert_objects(convert_numeric=True).fillna(6).astype(np.int)
-    
+
+    playerList.AvgSt = playerList.AvgSt.convert_objects(convert_numeric=True).fillna(0).astype(float)
+    playerList.AllWinRate = playerList.AvgSt.convert_objects(convert_numeric=True).fillna(0).astype(float)
+    playerList.All2renRate	= playerList.AvgSt.convert_objects(convert_numeric=True).fillna(0).astype(float)
+    playerList.PlaceWinRate	= playerList.AvgSt.convert_objects(convert_numeric=True).fillna(0).astype(float)
+    playerList.Place2renRate = playerList.AvgSt.convert_objects(convert_numeric=True).fillna(0).astype(float)
+
     result = pd.merge(playerList, result, how="inner", on=["Name","Lane"])
     day = link[48:56]
     jyo = link[61:63]
